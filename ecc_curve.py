@@ -13,26 +13,30 @@ P = (2, 9)
 def mod_invert(a, p):
    return pow(a, -1, p)
 
-def point_add(p1, p2):
-   if p1 is None: return p2
-   if p2 is None: return p1
+def point_add(P1, P2):
+   if P1 is None:
+      return P2
+   if P2 is None:
+      return P1
 
-   x1, y1 = p1
-   x2, y2 = p2
+   x1, y1 = P1
+   x2, y2 = P2
 
-   if x1 == x2 and y1 == y2:
-      num = (3 * x1**2 + A)
-      den = (2 * y1)
+   if x1 == x2 and (y1 + y2) % P_MOD == 0:
+      return None
+
+   if P1 == P2:
+      m = (3 * x1 * x1 + A) * mod_invert(2 * y1, P_MOD)
    else:
-      num = (y2 - y1)
-      den = (x2 - x1)
+      m = (y2 - y1) * mod_invert(x2 - x1, P_MOD)
 
-   s = (num * mod_invert(den, P_MOD)) % P_MOD
+   m %= P_MOD
 
-   qx = (s**2 - x1 - x2) % P_MOD
-   qy = (s * (x1 - qx) - y1) % P_MOD
+   x3 = (m * m - x1 - x2) % P_MOD
+   y3 = (m * (x1 - x3) - y1) % P_MOD
 
-   return (qx, qy)
+   return (x3, y3)
+
 
 def double_add(k, point):
    result = None
