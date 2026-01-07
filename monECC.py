@@ -1,3 +1,5 @@
+import sys
+
 def print_help():
       print("""
       -- Script monECC par Nicolas OSBORNE --
@@ -21,4 +23,14 @@ def print_help():
             -f <file> permet de choisir le nom des clé générées, monECC.pub et monECC.priv par défaut
 """)
 
-print_help()
+def main():
+   if len(sys.argv) < 2 or sys.argv[1] == "help":
+      print_help()
+      return
+
+   command = sys.argv[1]
+   print(f"Commande reçue : {command}")
+
+if __name__ == "__main__":
+   main()
+   
