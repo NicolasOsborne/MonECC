@@ -1,6 +1,7 @@
 import sys
+import base64
 
-from ecc_utils import generate_keypair
+from ecc_keys import generate_keypair
 
 DEFAULT_PUBLIC_KEY_FILE = "monECC.pub"
 DEFAULT_PRIVATE_KEY_FILE = "monECC.priv"
@@ -43,6 +44,19 @@ def run_cli():
       k, Q = generate_keypair()
       print(f"Clé privée : {k}")
       print(f"Clé publique : {Q}")
+
+      with open(private_file, "w") as private_key_file:
+         private_key_file.write("---begin monECC private key---\n")
+         private_key_file.write(base64.b64encode(str(k).encode("utf-8")).decode("utf-8") + "\n")
+         private_key_file.write("---end monECC key---\n")
+
+      Q_str = f"{Q[0]};{Q[1]}"
+      with open(public_file, "w") as public_key_file:
+         public_key_file.write("---begin monECC public key---\n")
+         public_key_file.write(base64.b64encode(Q_str.encode("utf-8")).decode("utf-8") + "\n")
+         public_key_file.write("---end monECC key---\n")
+
+      print(f"Clés générées : {private_file}, {public_file}")
 
    elif command == "crypt":
       pass
