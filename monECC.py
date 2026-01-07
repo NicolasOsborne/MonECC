@@ -32,12 +32,4 @@ def main():
    print(f"Commande reçue : {command}")
 
 if __name__ == "__main__":
-   from ecc_utils import generate_private_key, generate_public_key
-
-   k = generate_private_key()
-   Q = generate_public_key(k)
-
-   print("Clé privée (k) :", k)
-   print("Clé publique (Q) :", Q)
-   
    main()
