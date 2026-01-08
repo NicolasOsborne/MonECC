@@ -1,7 +1,8 @@
 import sys
 import base64
+import binascii
 
-from ecc_keys import generate_keypair
+from ecc_keys import generate_keypair, calculate_shared_secret, aes_encrypt
 
 DEFAULT_PUBLIC_KEY_FILE = "monECC.pub"
 DEFAULT_PRIVATE_KEY_FILE = "monECC.priv"
@@ -59,7 +60,49 @@ def run_cli():
       print(f"Clés générées : {private_file}, {public_file}")
 
    elif command == "crypt":
-      pass
+      if len(sys.argv) < 4:
+         print("Erreur : vous devez fournir un fichier clé publique et le texte à chiffrer")
+         return
+
+      public_key_file_path = sys.argv[2]
+      plaintext = sys.argv[3]
+
+      try:
+         with open(public_key_file_path, "r") as file:
+               lines = file.read().splitlines()
+      except FileNotFoundError:
+         print(f"Erreur : fichier {public_key_file_path} introuvable")
+         return
+
+      if lines[0].strip() != "---begin monECC public key---":
+         print("Erreur : fichier de clé publique invalide")
+         return
+
+      try:
+         decoded = base64.b64decode(lines[1].strip()).decode("utf-8")
+         Qx_str, Qy_str = decoded.split(";")
+         Qb = (int(Qx_str), int(Qy_str))
+      except Exception as e:
+         print("Erreur : impossible de lire la clé publique :", e)
+         return
+
+      try:
+         with open(private_file, "r") as file:
+            private_lines = file.read().splitlines()
+            if private_lines[0].strip() != "---begin monECC private key---":
+               raise ValueError("Fichier clé privée invalide")
+            k_encoded = private_lines[1].strip()
+            k = int(base64.b64decode(k_encoded).decode("utf-8"))
+      except Exception as e:
+         print("Erreur : impossible de lire la clé privée :", e)
+         return
+
+      iv, key = calculate_shared_secret(k, Qb)
+
+      ciphertext = aes_encrypt(plaintext, key, iv)
+
+      print("Texte chiffré (hex) :", binascii.hexlify(ciphertext).decode("utf-8"))
+
    elif command == "decrypt":
       pass
    else:
